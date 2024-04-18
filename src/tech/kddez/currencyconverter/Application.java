@@ -1,93 +1,100 @@
 package tech.kddez.currencyconverter;
 
-import tech.kddez.currencyconverter.configs.ExchangeRateAPI;
-import tech.kddez.currencyconverter.enums.ConversionOptions;
-import tech.kddez.currencyconverter.entities.CurrencyConvert;
+import tech.kddez.currencyconverter.api.ExchangeRateAPI;
+import tech.kddez.currencyconverter.model.Conversion;
+import tech.kddez.currencyconverter.model.ConversionHistory;
 
 import java.io.IOException;
-import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class Application {
 
     public static void main(String[] args) {
+
         Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
-        ExchangeRateAPI exchangeRateService = new ExchangeRateAPI();
 
-        try {
+        ExchangeRateAPI rateAPI = new ExchangeRateAPI();
+        ConversionHistory conversionHistory = new ConversionHistory();
+        long id = 0;
+        int option = 0;
 
-            ConversionOptions choice = null;
+        String baseCurrency, targetCurrency;
+        double amount;
 
-            while (choice != ConversionOptions.EXIT) {
-                System.out.println(options());
+        while (option != 7) {
 
-                int option = sc.nextInt();
-                sc.nextLine();
+            System.out.println(menu());
+            option = sc.nextInt();
+            sc.nextLine();
 
-                try {
-                    choice = ConversionOptions.values()[option];
-                } catch (ArrayIndexOutOfBoundsException e) {
+            switch (option) {
+                case 1:
+                    baseCurrency = "USD";
+                    targetCurrency = "ARS";
+                    break;
+                case 2:
+                    baseCurrency = "ARS";
+                    targetCurrency = "USD";
+                    break;
+                case 3:
+                    baseCurrency = "USD";
+                    targetCurrency = "BRL";
+                    break;
+                case 4:
+                    baseCurrency = "BRL";
+                    targetCurrency = "USD";
+                    break;
+                case 5:
+                    baseCurrency = "USD";
+                    targetCurrency = "COP";
+                    break;
+                case 6:
+                    baseCurrency = "COP";
+                    targetCurrency = "USD";
+                    break;
+                case 7:
+                    System.out.println("Conversion History:");
+                    conversionHistory.getConversionList().forEach(System.out::println);
+                    return;
+                default:
                     System.out.println("Opção inválida!");
                     continue;
-                }
-
-                if (choice == ConversionOptions.EXIT) {
-                    break;
-                }
-
-                String baseCode, currencyCodeToConvert;
-                double amountInBaseCurrency;
-
-                switch (choice) {
-                    case USD_TO_BRL:
-                        baseCode = "USD";
-                        currencyCodeToConvert = "BRL";
-                        break;
-                    case BRL_TO_USD:
-                        baseCode = "BRL";
-                        currencyCodeToConvert = "USD";
-                        break;
-                    case ARS_TO_USD:
-                        baseCode = "ARS";
-                        currencyCodeToConvert = "USD";
-                        break;
-                    case USD_TO_ARS:
-                        baseCode = "USD";
-                        currencyCodeToConvert = "ARS";
-                        break;
-                    default:
-                        System.out.println("Opção inválida!");
-                        continue;
-                }
-
-                System.out.println("Digite a quantidade na moeda base:");
-                amountInBaseCurrency = sc.nextDouble();
-
-                HttpResponse<String> response = exchangeRateService.connection(baseCode);
-                double conversionRate = exchangeRateService.extractConversionRate(response, currencyCodeToConvert);
-                double amountAfterConvert = exchangeRateService.currencyConvert(amountInBaseCurrency, conversionRate);
-
-                CurrencyConvert currencyConvert = new CurrencyConvert(baseCode, currencyCodeToConvert, amountInBaseCurrency);
-                currencyConvert.setAmountAfterConvert(amountAfterConvert);
-                System.out.println(currencyConvert);
             }
+                id++;
 
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            sc.close();
+                System.out.println("Enter with amount to conversion");
+                amount = sc.nextDouble();
+
+                double convertedAmount = rateAPI.currencyConvert(baseCurrency, targetCurrency, amount);
+
+                Conversion conversion = new Conversion(id, baseCurrency, targetCurrency, amount, convertedAmount, LocalDateTime.now());
+                System.out.println(conversion);
+                conversionHistory.addConversion(conversion);
+
         }
+
+
     }
 
-    public static String options() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Escolha uma opção de conversão:\n");
-        for (int i = 0; i < ConversionOptions.values().length; i++) {
-            sb.append(i).append(". ").append(ConversionOptions.values()[i].getDescription()).append("\n");
-        }
-        return sb.toString();
+    public static String menu(){
+        return """
+                ***********************************
+                WELCOME TO THE CURRENCY CONVERTER
+                
+                1. DÓLAR ==> PESO ARGENTINO
+                2. PESO ARGENTINO ==> DÓLAR
+                3. DÓLAR ==> REAL BRASILEIRO
+                4. REAL BRASILEIRO ==> DÓLAR
+                5. DÓLAR ==> PESO COLOMBIANO
+                6. PESO COLOMBIANO ==> DÓLAR
+                7. VIEW CONVERSION HISTORY AND EXIT
+                
+                ==> CHOOSE A VALID OPTION
+                ***********************************
+                """;
     }
 }
 
