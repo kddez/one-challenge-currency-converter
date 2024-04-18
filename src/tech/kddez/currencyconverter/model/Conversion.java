@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 
 public class Conversion {
 
-    private Long id;
     private String baseCurrency;
     private String targetCurrency;
     private LocalDateTime convertedAt;
@@ -16,8 +15,7 @@ public class Conversion {
 
     }
 
-    public Conversion(Long id, String baseCurrency, String targetCurrency, Double amount, Double convertedAmount, LocalDateTime convertedAt) {
-        this.id = id;
+    public Conversion(String baseCurrency, String targetCurrency, Double amount, Double convertedAmount, LocalDateTime convertedAt) {
         this.baseCurrency = baseCurrency;
         this.targetCurrency = targetCurrency;
         this.convertedAt = convertedAt;
@@ -26,13 +24,6 @@ public class Conversion {
     }
 
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public LocalDateTime getConvertedAt() {
         return convertedAt;
@@ -79,12 +70,11 @@ public class Conversion {
         double conversionRate = convertedAmount/amount;
         var formattedDate = convertedAt.format(DateTimeFormatter.ofPattern("dd/MM/yy | HH:mm:ss"));
         return """
-           ID: %d
            Momento da conversão: %s
            Conversão de %.2f %s para %s:
            Taxa de conversão: 1 %s = %.2f %s
            Valor convertido: %.2f %s = %.2f %s
-           """.formatted(id, formattedDate, amount, baseCurrency,
+           """.formatted(formattedDate, amount, baseCurrency,
                 targetCurrency, baseCurrency, conversionRate, targetCurrency,
                 amount, baseCurrency, convertedAmount, targetCurrency);
     }

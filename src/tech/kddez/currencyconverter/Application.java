@@ -1,34 +1,31 @@
 package tech.kddez.currencyconverter;
 
 import tech.kddez.currencyconverter.api.ExchangeRateAPI;
-import tech.kddez.currencyconverter.model.Conversion;
 import tech.kddez.currencyconverter.model.ConversionHistory;
+import tech.kddez.currencyconverter.service.ConversionService;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class Application {
 
+
+
     public static void main(String[] args) {
 
-        Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
 
-        ExchangeRateAPI rateAPI = new ExchangeRateAPI();
-        ConversionHistory conversionHistory = new ConversionHistory();
-        long id = 0;
-        int option = 0;
+        ConversionService conversionService = new ConversionService(new ExchangeRateAPI());
+        ConversionHistory history = new ConversionHistory();
 
+        int option = 0;
         String baseCurrency, targetCurrency;
         double amount;
 
-        while (option != 7) {
+        while (option != 7){
 
             System.out.println(menu());
             option = sc.nextInt();
-            sc.nextLine();
 
             switch (option) {
                 case 1:
@@ -56,23 +53,19 @@ public class Application {
                     targetCurrency = "USD";
                     break;
                 case 7:
-                    System.out.println("Conversion History:");
-                    conversionHistory.getConversionList().forEach(System.out::println);
+                    history.getConversionList().forEach(System.out::println);
                     return;
                 default:
-                    System.out.println("Opção inválida!");
+                    System.out.println("Opção Inválida!");
                     continue;
             }
-                id++;
 
-                System.out.println("Enter with amount to conversion");
-                amount = sc.nextDouble();
+            System.out.println("Enter with amount to conversion");
+            amount = sc.nextDouble();
 
-                double convertedAmount = rateAPI.currencyConvert(baseCurrency, targetCurrency, amount);
-
-                Conversion conversion = new Conversion(id, baseCurrency, targetCurrency, amount, convertedAmount, LocalDateTime.now());
-                System.out.println(conversion);
-                conversionHistory.addConversion(conversion);
+            var conversion = conversionService.createConversion(baseCurrency, targetCurrency, amount);
+            System.out.println(conversion);
+            history.addConversion(conversion);
 
         }
 
@@ -96,5 +89,6 @@ public class Application {
                 ***********************************
                 """;
     }
+
 }
 
