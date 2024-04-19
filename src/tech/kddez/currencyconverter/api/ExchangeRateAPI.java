@@ -25,15 +25,17 @@ public class ExchangeRateAPI {
     }
 
     public double extractConversionRate(String jsonResponse, String targetCurrency) {
-        double conversionRate = 0.0;
-            JsonObject jsonObject = new Gson().fromJson(jsonResponse, JsonObject.class);
-            JsonObject rates = jsonObject.getAsJsonObject("conversion_rates");
-            if(rates.has(targetCurrency.toUpperCase())){
-                conversionRate = rates.get(targetCurrency.toUpperCase()).getAsDouble();
-            } else {
-                return -1;
-            }
-            return conversionRate;
+
+        double conversionRate;
+
+        JsonObject jsonObject = new Gson().fromJson(jsonResponse, JsonObject.class);
+        JsonObject rates = jsonObject.getAsJsonObject("conversion_rates");
+        if(rates.has(targetCurrency.toUpperCase())){
+            conversionRate = rates.get(targetCurrency.toUpperCase()).getAsDouble();
+        } else {
+            return -1;
+        }
+        return conversionRate;
     }
 
     public Double currencyConvert(String baseCurrency, String targetCurrency, double amount){
